@@ -3,9 +3,8 @@
 #define FUNCOES_GERADORAS_H
 
 typedef struct AlunoData {
-    // seus campos, ex:
-    char nome[100];
-    char cpf[15];
+    char nome[50];
+    char cpf[12];
     int nota;
 } Aluno;
 

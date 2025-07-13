@@ -14,7 +14,7 @@
 
 void gerar_nome(char vetor[]){
     for(int i = 0;i < 11;i++){//onde devo alterar caso o nome esteja pequeno demais
-        vetor[i] = 'a' + rand() % ('z' - 'a' +1);
+        vetor[i] = 'a' + rand() % 26;
     }
     vetor[11] = '\0';
 }
