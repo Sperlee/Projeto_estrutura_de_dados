@@ -4,8 +4,11 @@
 #include "funções_geradoras.h"
 #include "heap.h"
 #include "hash.h"
+#include <string.h>
 
 #define TAMANHO_HEAP 10000
+#define HASH_TAM 100000
+#define MARCA_REMOVIDO "REMOVIDO"
 
 void main(){
     int acao = -1;
@@ -15,6 +18,7 @@ void main(){
         printf("Digite o numero da ação que deseja executar:\n");
         printf("1.Gerar documento de alunos.\n");
         printf("2.Acessar parte da HEAP.\n");
+        printf("3.Acessar parte de HASH\n");
         scanf("%d",&acao);
 
         switch (acao){
@@ -111,8 +115,8 @@ void main(){
                             break;
 
                         case 2:
-
-                            for (int i = 1; i <= novo_tamanho_heap; i++) {
+                           
+                            for (int i = 0; i < novo_tamanho_heap; i++) {
                                 printf("cpf: %-12s nome: %-11s nota: %d\n", heap[i].cpf, heap[i].nome, heap[i].nota);
                             }
                             printf("\n");
@@ -130,15 +134,113 @@ void main(){
                     printf("3.Remover elemento\n");
                     printf("0.Sair da area de HEAP.\n");
                     scanf("%d",&resposta_heap);
-//---------------------------------------------------------------------FIM DO MENU -----------------------------------------------------------------------------------------------
                 }
-            case 3://-----------------------------------------------------HASH-------------------------------------------------------------------------------
+//----------------------------------------------------------------------------...-----------------------------------------------------------------------
+//----------------------------------------------------------------------------HASH-------------------------------------------------------------------------------
+               
+            case 3:
+                //----------------criei a hash com os 10000 elementos do registro------------------------
+                int resposta_hash = -1;
+                FILE* arq_hash;
 
+                Aluno* tabela_hash = inicializarTabela();
+                
+                arq_hash = fopen("registros.bin","rb");
+                
+                for(int i = 0;i < TAMANHO_HEAP;i++){
+                    Aluno temp;
+                    fread(&temp,sizeof(Aluno),1,arq_hash);
+                    inserir_hash(tabela_hash,temp);
+                }
+                fclose(arq_hash);
+                
 
-            }
+                arq_hash = fopen("ArquivoHash.bin","wb");
+                for(int i = 0;i < TAMANHO_HEAP;i++){
+                    fwrite(&tabela_hash[i],sizeof(Aluno),1,arq_hash);
+                }
+                fclose(arq_hash);
+
+                int novo_tamanho_hash = TAMANHO_HEAP;
+
+                //-----------------------FUNÇÕES PARA USAR A TABELA HASH-----------------------------------
+                while(resposta_hash != 0){
+                    switch (resposta_hash){
+//---------------------------------------------------------inserir elemento HASH ------------------------------------------------------------------
+                        case 1:
+                            while(resposta_hash == 1){
+                                novo_tamanho_hash ++;
+                                Aluno novo;
+                                printf("Digite o CPF:\n");
+                                scanf("%s",novo.cpf);
+                                printf("Digite o nome:\n");
+                                scanf("%s",novo.nome);
+                                printf("Digite a nota:\n");
+                                scanf("%d",&novo.nota);
+                                int pos = inserir_hash(tabela_hash,novo);
+                                
+                                if(pos != -1){
+                                    tabela_hash[pos] = novo;
+                                    arq_hash = fopen("ArquivoHash.bin","wb");
+                                    for(int i = 0;i < novo_tamanho_hash;i++){
+                                        fwrite(&tabela_hash[i],sizeof(Aluno),1,arq_hash);
+                                    }
+                                    fclose(arq_hash);
+                                }
+                                else{
+                                    printf("Sem espaço para mais armazenamento na tabela.\n");
+                                    resposta_hash = 0;
+                                }
+                                printf("Deseja inserir mais um elemento?Sim(1) Nao(0)\n");
+                                scanf("%d",&resposta_hash);
+                                
+                            }
+                            break;
+//---------------------------------------------------mostrar elementos da HASH-------------------------------------------------------------------
+                        case 2:
+                            printf("Lista de elementos na tabela HASH:\n");
+                            int c = 0; // Contador de elementos válidos na tabela hash
+                            for (int i = 0; i < HASH_TAM; i++) {
+                                // Verifica se a posição está ocupada e não foi marcada como removida
+                                if (tabela_hash[i].cpf[0] != '\0' && strcmp(tabela_hash[i].cpf, MARCA_REMOVIDO) != 0) {
+                                    printf("Posição: %d | CPF: %-12s | Nome: %-11s | Nota: %d\n",
+                                           i, tabela_hash[i].cpf, tabela_hash[i].nome, tabela_hash[i].nota);
+                                    c++;
+                                }
+                            }
+                            printf("\nTotal de elementos na tabela HASH: %d\n", c);
+                            break;
+
+//-------------------------------------------------------remoção da HASH----------------------------------------------------------------------
+                        case 3:
+                            char temp_cpf[12];
+                            printf("Digite o cpf de quem deseja remover da lista:\n");
+                            scanf("%s",temp_cpf);
+                            int chave_hash = buscar(tabela_hash,temp_cpf);
+
+                            printf("removendo o aluno:  %-11s de cpf:%-12s.\n",tabela_hash[chave_hash].nome,tabela_hash[chave_hash].cpf);
+
+                            if(remover_hash(tabela_hash,temp_cpf)){
+                                novo_tamanho_hash--;
+                            }
+                            else{
+                                printf("Elemento não encontrado na tabela HASH,\n");
+                            }
+                            break;
+                    }
+                    printf("1.Inserir elemento\n");
+                    printf("2.Imprimir a lista do arquivo HASH.\n");
+                    printf("3.Remover elemento\n");
+                    printf("0.Sair da area de HASH.\n");
+                    scanf("%d",&resposta_hash);
+                }
+
+                
+            case 4:
+            }  
 
         printf("Deseja continuar?Sim(1) Nao(0)\n");
         scanf("%d",&acao);
-
+                
     }
 }

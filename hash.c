@@ -3,52 +3,103 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define NUM_DIGITOS_CPF 12
+#define HASH_TAM 100000
+#define MARCA_REMOVIDO "REMOVIDO"
 
-void inicializar(Hash *tab,int n){
-    for(int i = 0;i < n;i++){
-        tab[i] = NULL;
+
+
+int gerarSeed(const char *cpf) {
+    int seed = 0;
+    for (int i = 0; i < 9 && cpf[i] != '\0'; i++) {
+        if (cpf[i] >= '0' && cpf[i] <= '9') {
+            seed = seed * 10 + (cpf[i] - '0');
+        }
     }
+    return seed;
 }
 
 
-Aluno *aloca(char cpf[NUM_DIGITOS_CPF],char nome[50],int nota,Hash *tab){
-    Aluno *novo = (Aluno*)malloc(sizeof(Aluno));
-    
-    for(int i = 0;i < NUM_DIGITOS_CPF;i++){
-        novo->cpf[i] = cpf[i];
-    }
-    
-    for(int i = 0;i < 49;i++){
-        novo->nome[i] = nome[i];
-    }
-    novo->nome[49] = '\0';
-
-    novo->nota = nota;
-
-    return novo;
+int gerarHash(const char *cpf) {
+    int chave = gerarSeed(cpf);
+    srand(chave);
+    return rand() % HASH_TAM;
 }
 
 
-int hash_linha(char cpf[NUM_DIGITOS_CPF],int n){
-    int soma = 0;
-    for(int i = 0;i < NUM_DIGITOS_CPF;i++){
-        soma += cpf[i];
+Aluno* inicializarTabela() {
+    Aluno* tabela = (Aluno*)malloc(sizeof(Aluno)*(HASH_TAM));
+
+    if(tabela == NULL){
+        printf("Problema ao alocar memoria para a tabela HASH.\n");
+        exit(1);
     }
-    srand(soma);
 
-    return rand() % n;
+    for (int i = 0; i < HASH_TAM; i++) {
+        tabela[i].cpf[0] = '\0';
+    }
+
+    return tabela;
 }
 
 
-int hash(char cpf[NUM_DIGITOS_CPF],int n){
-    return (hash_linha(cpf,n)) % n;//usei tentativa linear
+int inserir_hash(Aluno* tabela, Aluno novo) {
+    int h = gerarHash(novo.cpf);
+    int primeiroRemovido = -1; 
+
+    for (int i = 0; i < HASH_TAM; i++) {
+        int pos = (h + i) % HASH_TAM;
+
+        if (tabela[pos].cpf[0] == '\0') {
+            
+            if (primeiroRemovido != -1) pos = primeiroRemovido;
+
+            tabela[pos] = novo;
+            return pos;
+        }
+
+        if (strcmp(tabela[pos].cpf, MARCA_REMOVIDO) == 0 && primeiroRemovido == -1) {
+            
+            primeiroRemovido = pos;
+        }
+
+        
+    }
+
+    return -1; 
 }
 
 
-int buscar(Hash *tab,char cpf[NUM_DIGITOS_CPF],int n){
+int buscar(Aluno tabela[], const char *cpf) {
+    int h = gerarHash(cpf);
 
-    int pos = hash(cpf,n);
-    
+    for (int i = 0; i < HASH_TAM; i++) {
+        int pos = (h + i) % HASH_TAM;
+
+        if (tabela[pos].cpf[0] == '\0') {
+            return -1; // CPF não está na tabela
+        }
+
+        if (strcmp(tabela[pos].cpf, cpf) == 0) {
+            return pos; // CPF encontrado
+        }
+    }
+
+    return -1; // CPF não encontrado
+}
+
+
+int remover_hash(Aluno tabela[], const char *cpf) {
+    int pos = buscar(tabela, cpf);
+
+    if (pos != -1) {
+        strcpy(tabela[pos].cpf, MARCA_REMOVIDO);
+        tabela[pos].nome[0] = '\0';
+        tabela[pos].nota = -1;
+        return 1;
+    }
+
+    return 0;
 }
