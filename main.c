@@ -258,13 +258,12 @@ void main(){
                 break;
 //--------------------------------------------------------------ARVORE B+--------------------------------------------------------------------------------                
             case 4:
-                //----------------criei a Árvore B+ com os 10000 elementos do registro------------------------
+//---------------------------------------criei a Árvore B+ com os 10000 elementos do registro--------------------------------------
                 int resposta_arvore = -1;
 
-                // Inicializa a Árvore B+
                 ArvoreBMais* arvore = inicializarArvoreBMais();
 
-                // Abre o arquivo registros.bin
+
                 FILE* arq_bmais = fopen("registros.bin", "rb");
                 if (arq_bmais == NULL) {
                     printf("Erro ao abrir o arquivo registros.bin.\n");
@@ -275,13 +274,13 @@ void main(){
                 for (int i = 0; i < TAMANHO_HEAP; i++) {
                     Aluno temp;
                     if (fread(&temp, sizeof(Aluno), 1, arq_bmais)) {
-                        // Extrai os 9 primeiros dígitos do CPF como chave
+
                         char chave_cpf[10];
                         strncpy(chave_cpf, temp.cpf, 9);
-                        chave_cpf[9] = '\0'; // Adiciona o terminador nulo
+                        chave_cpf[9] = '\0';
 
-                        int chave = atoi(chave_cpf); // Converte para inteiro
-                        inserirArvoreBMais(arvore, chave); // Insere na Árvore B+
+                        int chave = atoi(chave_cpf);
+                        inserirArvoreBMais(arvore, chave); 
                     } else {
                         printf("Erro ao ler o arquivo ou arquivo incompleto.\n");
                         fclose(arq_bmais);
@@ -289,21 +288,21 @@ void main(){
                     }
                 }
 
-                // Fecha o arquivo
                 fclose(arq_bmais);
 
                 printf("Árvore B+ criada com os dados do arquivo registros.bin.\n");
                 criarArquivoIndices("registros.bin", "ArquivoIndices.bin");
-                // Menu para manipular a Árvore B+
+
+
+
                 while (resposta_arvore != 0) {
                     printf("-----------------1.Inserir elemento----------------\n");
-                    printf("--------------2.Imprimir a lista da Árvore B+------\n");
-                    printf("--------------3.Salvar Árvore B+ em arquivo--------\n");
+                    printf("--------------2.Salvar Árvore B+ em arquivo--------\n");
                     printf("--------------0.Sair da área de Árvore B+----------\n");
                     scanf("%d", &resposta_arvore);
 
                     switch (resposta_arvore) {
-                        //-------------------------------------------------------------inserir elemento Árvore B+ ------------------------------------------------------------------
+//-------------------------------------------------------------inserir elemento Árvore B+ ------------------------------------------------------------------
                         case 1: {
                             Aluno novo;
                             printf("Digite o CPF:\n");
@@ -323,15 +322,8 @@ void main(){
                             printf("Elemento inserido com sucesso na Árvore B+.\n");
                             break;
                         }
-                        //---------------------------------------------------mostrar elementos da Árvore B+-------------------------------------------------------------------
-                        case 2:
-                            printf("Lista de elementos na Árvore B+:\n");
-                            imprimirArvoreBMais(arvore->raiz);
-                            printf("\n");
-                            break;
-
-                        //---------------------------------------------------salvar elementos da Árvore B+ em arquivo--------------------------------------------------------
-                        case 3: {
+//---------------------------------------------------salvar elementos da Árvore B+ em arquivo--------------------------------------------------------
+                        case 2: {
                             FILE* arq_bmais_out = fopen("ArquivoBMais.bin", "wb");
                             if (arq_bmais_out == NULL) {
                                 printf("Erro ao criar o arquivo ArquivoBMais.bin.\n");

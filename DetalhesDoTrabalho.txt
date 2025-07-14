@@ -16,4 +16,8 @@ registros.bin           # Arquivo binário inicial com 10.000 registros
 Explicação Detalhada do Arquivo main.c
     O arquivo main.c é o ponto de entrada do programa e implementa um menu interativo que permite ao usuário acessar e manipular as três estruturas de dados principais do projeto: Heap Máxima, Tabela Hash e Árvore B+.Ele organiza as funcionalidades em diferentes opções do menu, permitindo que o usuário escolha qual estrutura deseja manipular.
 
-    tentei ao maximo deixar ele bem separado e organizado para a melhor visualização.
+
+
+instrução para compilar o codigo : gcc main.c funções_geradoras.c heap.c hash.c arvoreB+.c -o programa
+
+tentei ao maximo deixar ele bem separado e organizado para a melhor visualização e o mais prático possível para uso.
