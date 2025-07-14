@@ -4,6 +4,7 @@
 #include "funções_geradoras.h"
 #include "heap.h"
 #include "hash.h"
+#include "arvoreB+.h"
 #include <string.h>
 
 #define TAMANHO_HEAP 10000
@@ -15,10 +16,11 @@ void main(){
     int resposta;
     while(acao != 0){
 
-        printf("Digite o numero da ação que deseja executar:\n");
-        printf("1.Gerar documento de alunos.\n");
-        printf("2.Acessar parte da HEAP.\n");
-        printf("3.Acessar parte de HASH\n");
+        printf("----Digite o numero da ação que deseja executar:--------\n");
+        printf("--------------1.Gerar documento de alunos.--------------\n");
+        printf("--------------2.Acessar parte da HEAP-------------------\n");
+        printf("--------------3.Acessar parte de HASH-------------------\n");
+        printf("--------------4.Acessar parte da Árvore B+--------------\n");
         scanf("%d",&acao);
 
         switch (acao){
@@ -42,7 +44,7 @@ void main(){
                 Aluno aluno;
 
                 arq = fopen("registros.bin","rb");
-                
+
                 if(arq == NULL){
                     printf("Nao foi possivel abrir o arquivo bin.\n");
                     exit(1);
@@ -129,12 +131,13 @@ void main(){
                             break;
                                 
                     }
-                    printf("1.Inserir elemento\n");
-                    printf("2.Imprimir a lista do arquivo HEAP.\n");
-                    printf("3.Remover elemento\n");
-                    printf("0.Sair da area de HEAP.\n");
+                    printf("-----------------1.Inserir elemento------------------\n");
+                    printf("--------------2.Imprimir a lista do arquivo HEAP-----\n");
+                    printf("-----------------3.Remover elemento------------------\n");
+                    printf("--------------0.Sair da area de HEAP-----------------\n");
                     scanf("%d",&resposta_heap);
                 }
+                break;
 //----------------------------------------------------------------------------...-----------------------------------------------------------------------
 //----------------------------------------------------------------------------HASH-------------------------------------------------------------------------------
                
@@ -143,30 +146,48 @@ void main(){
                 int resposta_hash = -1;
                 FILE* arq_hash;
 
+                // Inicializa a tabela hash
                 Aluno* tabela_hash = inicializarTabela();
-                
-                arq_hash = fopen("registros.bin","rb");
-                
-                for(int i = 0;i < TAMANHO_HEAP;i++){
-                    Aluno temp;
-                    fread(&temp,sizeof(Aluno),1,arq_hash);
-                    inserir_hash(tabela_hash,temp);
-                }
-                fclose(arq_hash);
-                
 
+                // Abre o arquivo registros.bin
+                arq_hash = fopen("registros.bin", "rb");
+                if (arq_hash == NULL) {
+                    printf("Erro ao abrir o arquivo registros.bin.\n");
+                    exit(1);
+                }
+
+                // Lê os registros do arquivo e insere na tabela hash
+                for (int i = 0; i < TAMANHO_HEAP; i++) {
+                    Aluno temp;
+                    if (fread(&temp, sizeof(Aluno), 1, arq_hash)) {
+                        inserir_hash(tabela_hash, temp);
+                    } else {
+                        printf("Erro ao ler o arquivo ou arquivo incompleto.\n");
+                        fclose(arq_hash);
+                        free(tabela_hash);
+                        exit(1);
+                    }
+                }
+
+                // Fecha o arquivo
+                fclose(arq_hash);
+
+                printf("Tabela hash criada com os dados do arquivo registros.bin.\n");
+//---------------------------------------------------------Gerador de arquivo Hash.bin -----------------------------------------------------------------          
                 arq_hash = fopen("ArquivoHash.bin","wb");
-                for(int i = 0;i < TAMANHO_HEAP;i++){
+
+                for(int i = 0;i < HASH_TAM;i++){
                     fwrite(&tabela_hash[i],sizeof(Aluno),1,arq_hash);
                 }
+
                 fclose(arq_hash);
 
-                int novo_tamanho_hash = TAMANHO_HEAP;
+                int novo_tamanho_hash = HASH_TAM;
 
-                //-----------------------FUNÇÕES PARA USAR A TABELA HASH-----------------------------------
+ //-------------------------------------------FUNÇÕES PARA USAR A TABELA HASH--------------------------------------------------------------------------
                 while(resposta_hash != 0){
                     switch (resposta_hash){
-//---------------------------------------------------------inserir elemento HASH ------------------------------------------------------------------
+//-------------------------------------------------------------inserir elemento HASH ------------------------------------------------------------------
                         case 1:
                             while(resposta_hash == 1){
                                 novo_tamanho_hash ++;
@@ -211,7 +232,7 @@ void main(){
                             printf("\nTotal de elementos na tabela HASH: %d\n", c);
                             break;
 
-//-------------------------------------------------------remoção da HASH----------------------------------------------------------------------
+//--------------------------------------------------------------remoção da HASH----------------------------------------------------------------------
                         case 3:
                             char temp_cpf[12];
                             printf("Digite o cpf de quem deseja remover da lista:\n");
@@ -221,23 +242,117 @@ void main(){
                             printf("removendo o aluno:  %-11s de cpf:%-12s.\n",tabela_hash[chave_hash].nome,tabela_hash[chave_hash].cpf);
 
                             if(remover_hash(tabela_hash,temp_cpf)){
-                                novo_tamanho_hash--;
+                                printf("Removido com sucesso!!.\n");
                             }
                             else{
                                 printf("Elemento não encontrado na tabela HASH,\n");
                             }
                             break;
                     }
-                    printf("1.Inserir elemento\n");
-                    printf("2.Imprimir a lista do arquivo HASH.\n");
-                    printf("3.Remover elemento\n");
-                    printf("0.Sair da area de HASH.\n");
+                    printf("-----------------1.Inserir elemento----------------\n");
+                    printf("--------------2.Imprimir a lista do arquivo HASH.--\n");
+                    printf("-----------------3.Remover elemento----------------\n");
+                    printf("--------------0.Sair da area de HASH---------------\n");
                     scanf("%d",&resposta_hash);
                 }
-
-                
+                break;
+//--------------------------------------------------------------ARVORE B+--------------------------------------------------------------------------------                
             case 4:
-            }  
+                //----------------criei a Árvore B+ com os 10000 elementos do registro------------------------
+                int resposta_arvore = -1;
+
+                // Inicializa a Árvore B+
+                ArvoreBMais* arvore = inicializarArvoreBMais();
+
+                // Abre o arquivo registros.bin
+                FILE* arq_bmais = fopen("registros.bin", "rb");
+                if (arq_bmais == NULL) {
+                    printf("Erro ao abrir o arquivo registros.bin.\n");
+                    exit(1);
+                }
+
+                // Lê os registros do arquivo e insere na Árvore B+
+                for (int i = 0; i < TAMANHO_HEAP; i++) {
+                    Aluno temp;
+                    if (fread(&temp, sizeof(Aluno), 1, arq_bmais)) {
+                        // Extrai os 9 primeiros dígitos do CPF como chave
+                        char chave_cpf[10];
+                        strncpy(chave_cpf, temp.cpf, 9);
+                        chave_cpf[9] = '\0'; // Adiciona o terminador nulo
+
+                        int chave = atoi(chave_cpf); // Converte para inteiro
+                        inserirArvoreBMais(arvore, chave); // Insere na Árvore B+
+                    } else {
+                        printf("Erro ao ler o arquivo ou arquivo incompleto.\n");
+                        fclose(arq_bmais);
+                        exit(1);
+                    }
+                }
+
+                // Fecha o arquivo
+                fclose(arq_bmais);
+
+                printf("Árvore B+ criada com os dados do arquivo registros.bin.\n");
+                criarArquivoIndices("registros.bin", "ArquivoIndices.bin");
+                // Menu para manipular a Árvore B+
+                while (resposta_arvore != 0) {
+                    printf("-----------------1.Inserir elemento----------------\n");
+                    printf("--------------2.Imprimir a lista da Árvore B+------\n");
+                    printf("--------------3.Salvar Árvore B+ em arquivo--------\n");
+                    printf("--------------0.Sair da área de Árvore B+----------\n");
+                    scanf("%d", &resposta_arvore);
+
+                    switch (resposta_arvore) {
+                        //-------------------------------------------------------------inserir elemento Árvore B+ ------------------------------------------------------------------
+                        case 1: {
+                            Aluno novo;
+                            printf("Digite o CPF:\n");
+                            scanf("%s", novo.cpf);
+                            printf("Digite o nome:\n");
+                            scanf("%s", novo.nome);
+                            printf("Digite a nota:\n");
+                            scanf("%d", &novo.nota);
+
+                            // Extrai os 9 primeiros dígitos do CPF como chave
+                            char chave_cpf[10];
+                            strncpy(chave_cpf, novo.cpf, 9);
+                            chave_cpf[9] = '\0'; // Adiciona o terminador nulo
+
+                            int chave = atoi(chave_cpf); // Converte para inteiro
+                            inserirArvoreBMais(arvore, chave); // Insere na Árvore B+
+                            printf("Elemento inserido com sucesso na Árvore B+.\n");
+                            break;
+                        }
+                        //---------------------------------------------------mostrar elementos da Árvore B+-------------------------------------------------------------------
+                        case 2:
+                            printf("Lista de elementos na Árvore B+:\n");
+                            imprimirArvoreBMais(arvore->raiz);
+                            printf("\n");
+                            break;
+
+                        //---------------------------------------------------salvar elementos da Árvore B+ em arquivo--------------------------------------------------------
+                        case 3: {
+                            FILE* arq_bmais_out = fopen("ArquivoBMais.bin", "wb");
+                            if (arq_bmais_out == NULL) {
+                                printf("Erro ao criar o arquivo ArquivoBMais.bin.\n");
+                                break;
+                            }
+
+                            salvarArvoreBMais(arvore->raiz, arq_bmais_out);
+                            fclose(arq_bmais_out);
+                            printf("Elementos da Árvore B+ salvos no arquivo ArquivoBMais.bin.\n");
+                            break;
+                        }
+                        case 0:
+                            printf("Saindo da área de Árvore B+.\n");
+                            break;
+
+                        default:
+                            printf("Opção inválida. Tente novamente.\n");
+                    }
+                }
+                break;
+        }  
 
         printf("Deseja continuar?Sim(1) Nao(0)\n");
         scanf("%d",&acao);

@@ -4,6 +4,7 @@
         "stdio.h": "c",
         "stdlib.h": "c",
         "funções.h": "c",
-        "funções_geradoras.h": "c"
+        "funções_geradoras.h": "c",
+        "arvoreb+.h": "c"
     }
 }

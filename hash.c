@@ -38,7 +38,7 @@ Aluno* inicializarTabela() {
     }
 
     for (int i = 0; i < HASH_TAM; i++) {
-        tabela[i].cpf[0] = '\0';
+        tabela[i].cpf[0] = '0';
     }
 
     return tabela;
@@ -52,7 +52,7 @@ int inserir_hash(Aluno* tabela, Aluno novo) {
     for (int i = 0; i < HASH_TAM; i++) {
         int pos = (h + i) % HASH_TAM;
 
-        if (tabela[pos].cpf[0] == '\0') {
+        if (tabela[pos].cpf[0] == '0') {
             
             if (primeiroRemovido != -1) pos = primeiroRemovido;
 
@@ -95,9 +95,9 @@ int remover_hash(Aluno tabela[], const char *cpf) {
     int pos = buscar(tabela, cpf);
 
     if (pos != -1) {
-        strcpy(tabela[pos].cpf, MARCA_REMOVIDO);
+        tabela[pos].cpf[0] = '0';
         tabela[pos].nome[0] = '\0';
-        tabela[pos].nota = -1;
+        tabela[pos].nota = 0;
         return 1;
     }
 
